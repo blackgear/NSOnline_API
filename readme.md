@@ -11,6 +11,14 @@
 - [ ] Send to telegram channel
 - [x] Order item
 
+- [ ] New API "https://app.splatoon2.nintendo.net/api/data/stages"
+- [ ] New API "https://app.splatoon2.nintendo.net/api/festivals/active"
+- [ ] New API "https://app.splatoon2.nintendo.net/api/schedules"
+- [ ] New API "https://app.splatoon2.nintendo.net/api/records"
+- [ ] New API "https://app.splatoon2.nintendo.net/api/timeline"
+- [ ] New API "https://app.splatoon2.nintendo.net/api/onlineshop/merchandises"
+- [ ] New API "https://app.splatoon2.nintendo.net/api/results/110"
+
 ## LICENSE
 
 The MIT License
