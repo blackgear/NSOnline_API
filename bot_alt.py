@@ -148,24 +148,31 @@ class SplatoonLoginService(object):
 
     def authorize(self):
         url = 'https://app.splatoon2.nintendo.net'
-        request = Session.get(url, headers=self.headers)
-        return request.cookies['iksm_session']
+        content = Session.get(url, headers=self.headers).text
+        token = re.findall(r'data-unique-id="(\d*)"', content)[0]
+        return token
 
 class Splatoon(object):
     def __init__(self, token):
         self.headers = {
             'Accept': 'application/json',
             'Accept-Encoding': 'gzip',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5 Build/M4B30Z; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36'
-        }
-        self.cookies = {
-            'iksm_session': token
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5 Build/M4B30Z; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36',
+            'x-requested-with': 'XMLHttpRequest',
+            'x-unique-id': token
         }
 
     def get_merchandises(self):
         url = 'https://app.splatoon2.nintendo.net/api/onlineshop/merchandises'
-        content = Session.get(url, headers=self.headers, cookies=self.cookies).json()
+        content = Session.get(url, headers=self.headers).json()
         return content['merchandises']
+
+    def order(self, mid):
+        print(mid)
+        self.headers['Referer'] = 'https://app.splatoon2.nintendo.net/home/shop/{}'.format(mid)
+        url = 'https://app.splatoon2.nintendo.net/api/onlineshop/order/{}'.format(mid)
+        content = Session.post(url, files={'override': (None, '1')}, headers=self.headers).json()
+        return content
 
 def main():
     username = ''
@@ -175,7 +182,10 @@ def main():
     token = SplatoonLoginService(token).authorize()
 
     splatoon = Splatoon(token)
-    print(splatoon.get_merchandises())
+    merchandises = splatoon.get_merchandises()
+    print(merchandises)
+    mid = merchandises[0]['id']
+    print(splatoon.order(mid))
 
 if __name__ == '__main__':
     main()

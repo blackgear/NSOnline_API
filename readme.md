@@ -9,6 +9,7 @@
 - [x] Login NSOnline with cookies only
 - [x] Fetch Splatoon2 shop items
 - [ ] Send to telegram channel
+- [x] Order item
 
 ## LICENSE
 
