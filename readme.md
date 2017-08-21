@@ -2,6 +2,7 @@
 
 - bot.py: do oauth with cookies only
 - bot-alt.py: do oauth with username and password
+- session\_token.py: get session\_token with username and password
 
 # TODO
 
