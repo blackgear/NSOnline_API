@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # The MIT License
 
 # Copyright (c) 2017 Daniel
@@ -41,17 +40,11 @@ Session.mount('http://', adapter)
 Session.mount('https://', adapter)
 
 JWToken = re.compile(r'(eyJhbGciOiJIUzI1NiJ9\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*)')
+ClientID = '71b963c1b7b6d119'
 
-class NintendoOAuthService(object):
+class Login(object):
     def __init__(self, username, password):
-        self.headers = {
-            'Accept-Encoding': 'gzip',
-            'User-Agent': 'OnlineLounge/1.0.4 NASDKAPI Android',
-        }
-        self.clientid = '71b963c1b7b6d119'
-        self.username = username
-        self.password = password
-        self.verifier = self.rand()
+        self.session_token = self.login(username, password)
 
     def rand(self):
         return ''.join(random.choice(string.ascii_letters) for _ in range(50))
@@ -61,8 +54,8 @@ class NintendoOAuthService(object):
         text = base64.urlsafe_b64encode(text).decode()
         return text.replace('=', '')
 
-    def hmac(self, csrf_token):
-        msg = '{}:{}:{}'.format(self.username, self.password, csrf_token)
+    def hmac(self, username, password, csrf_token):
+        msg = '{}:{}:{}'.format(username, password, csrf_token)
         return hmac.new(csrf_token[-8:].encode(), msg=msg.encode(), digestmod=hashlib.sha256).hexdigest()
 
     def unpack(self, data):
@@ -72,23 +65,28 @@ class NintendoOAuthService(object):
             data += '='* (4 - missing_padding)
         return json.loads(base64.urlsafe_b64decode(data.encode()))
 
-    def authorize(self):
-        # Login sometimes error, I don't know why, but retry will solve...
+    def login(self, username, password):
+        verifier = self.rand()
+        headers = {
+            'Accept-Encoding': 'gzip',
+            'User-Agent': 'OnlineLounge/1.0.4 NASDKAPI Android'
+        }
         while True:
+            print('Try Login...')
             url = 'https://accounts.nintendo.com/connect/1.0.0/authorize'
             payload = {
-                'client_id'                           : self.clientid,
-                'redirect_uri'                        : 'npf{}://auth'.format(self.clientid),
+                'client_id'                           : ClientID,
+                'redirect_uri'                        : 'npf{}://auth'.format(ClientID),
                 'response_type'                       : 'session_token_code',
                 'scope'                               : 'openid user user.birthday user.mii user.screenName',
-                'session_token_code_challenge'        : self.hash(self.verifier),
+                'session_token_code_challenge'        : self.hash(verifier),
                 'session_token_code_challenge_method' : 'S256',
                 'state'                               : self.rand(),
                 'theme'                               : 'login_form'
             }
-            request = Session.get(url, params=payload, headers=self.headers)
-            post_login = request.history[0].url
-            csrf_token = JWToken.findall(request.text)[0]
+            content = Session.get(url, params=payload, headers=headers).text
+            csrf_token = JWToken.findall(content)[0]
+            post_login = self.unpack(csrf_token)['_ext']['p']['post_login_redirect_uri']
 
             url = 'https://accounts.nintendo.com/login'
             payload = {
@@ -96,29 +94,31 @@ class NintendoOAuthService(object):
                 'display'                             : '',
                 'post_login_redirect_uri'             : post_login,
                 'redirect_after'                      : 5,
-                'subject_id'                          : self.username,
-                'subject_password'                    : self.password,
-                '_h'                                  : self.hmac(csrf_token),
+                'subject_id'                          : username,
+                'subject_password'                    : password,
+                '_h'                                  : self.hmac(username, password, csrf_token),
             }
-            self.headers['Referer'] = request.url
-            request = Session.post(url, data=payload, headers=self.headers)
-            token_code = JWToken.findall(request.text)[0]
+            content = Session.post(url, data=payload, headers=headers).text
+            token_code = JWToken.findall(content)[0]
             if self.unpack(token_code)['typ'] == 'session_token_code':
                 break
 
         url = 'https://accounts.nintendo.com/connect/1.0.0/api/session_token'
         payload = {
-            'client_id': self.clientid,
+            'client_id': ClientID,
             'session_token_code': token_code,
-            'session_token_code_verifier': self.verifier
+            'session_token_code_verifier': verifier
         }
-        content = Session.post(url, data=payload, headers=self.headers).json()
+        content = Session.post(url, data=payload, headers=headers).json()
         return content['session_token']
 
 def main():
-    username = ''
-    password = ''
-    session_token = NintendoOAuthService(username, password).authorize()
+    username = input('Enter your username: ')
+    password = input('Enter your password: ')
+
+    session_token = Login(username, password).session_token
+
+    print('Here is your session_token:')
     print(session_token)
 
 if __name__ == '__main__':

@@ -1,24 +1,35 @@
-# NSOnline Bot
+# NSOnline API
 
-- bot.py: do oauth with cookies only
-- bot-alt.py: do oauth with username and password
-- session\_token.py: get session\_token with username and password
+- Login.py: get your session\_token with username and password
+- NSOnline.py: NSOnline core api wrapper
 
 # TODO
 
 - [x] Login NSOnline with username and password
-- [x] Login NSOnline with cookies only
-- [x] Fetch Splatoon2 shop items
-- [ ] Send to telegram channel
-- [x] Order item
+- [x] API https://app.splatoon2.nintendo.net/api/data/stages
+- [x] API https://app.splatoon2.nintendo.net/api/festivals/active
+- [x] API https://app.splatoon2.nintendo.net/api/schedules
+- [x] API https://app.splatoon2.nintendo.net/api/records
+- [x] API https://app.splatoon2.nintendo.net/api/timeline
+- [x] API https://app.splatoon2.nintendo.net/api/onlineshop/merchandises
+- [x] API https://app.splatoon2.nintendo.net/api/onlineshop/order
+- [x] API https://app.splatoon2.nintendo.net/api/results
 
-- [ ] New API "https://app.splatoon2.nintendo.net/api/data/stages"
-- [ ] New API "https://app.splatoon2.nintendo.net/api/festivals/active"
-- [ ] New API "https://app.splatoon2.nintendo.net/api/schedules"
-- [ ] New API "https://app.splatoon2.nintendo.net/api/records"
-- [ ] New API "https://app.splatoon2.nintendo.net/api/timeline"
-- [ ] New API "https://app.splatoon2.nintendo.net/api/onlineshop/merchandises"
-- [ ] New API "https://app.splatoon2.nintendo.net/api/results/110"
+# Example
+This example shows how to use NSOnline core api to get the last 50 game data.
+
+	#!/usr/bin/env python
+	# -*- coding: utf-8 -*-
+
+	from NSOnline import Splatoon
+
+	def main():
+	    Session_token = ''
+	    splatoon = Splatoon(Session_token)
+	    print(splatoon.get_results())
+
+	if __name__ == '__main__':
+	    main()
 
 ## LICENSE
 
