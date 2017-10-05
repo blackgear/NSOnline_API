@@ -114,8 +114,10 @@ class Splatoon(Nintendo):
         content = Session.get(url, headers=self.headers).json()
         return content
 
-    def get_festivals(self):
-        url = 'https://app.splatoon2.nintendo.net/api/festivals/active'
+    def get_festivals(self, mode='active'):
+        if mode not in ['active', 'pasts']:
+            raise Exception
+        url = 'https://app.splatoon2.nintendo.net/api/festivals/' + mode
         content = Session.get(url, headers=self.headers).json()
         return content
 

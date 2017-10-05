@@ -1,6 +1,7 @@
 # NSOnline API
 
-- Login.py: get your session\_token with username and password
+- Login.py: This code shows how to get your session\_token with username and password automatically, but this code may broken once Nintendo change their login codes.
+- Manual_Login.py: Get your session\_token manualy, it will open Nintendo's auth webpage for you to login in. After that, you should copy the link of the "Use this account" button and paste it in your terminal. Then you will get the session\_token. This code is always usable but require your interact.
 - NSOnline.py: NSOnline core api wrapper
 
 # TODO
